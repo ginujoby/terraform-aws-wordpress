@@ -21,15 +21,27 @@ resource "aws_subnet" "public" {
   }
 }
 
-# Private Subnets
-resource "aws_subnet" "private" {
+# Private App Subnets
+resource "aws_subnet" "private_app" {
   count             = 2
   vpc_id            = aws_vpc.website_vpc.id
   cidr_block        = "10.0.${count.index + 10}.0/24"
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
-    Name = "private-subnet-${count.index + 1}"
+    Name = "private-app-subnet-${count.index + 1}"
+  }
+}
+
+# Private Data Subnets
+resource "aws_subnet" "private_data" {
+  count             = 2
+  vpc_id            = aws_vpc.website_vpc.id
+  cidr_block        = "10.0.${count.index + 20}.0/24"
+  availability_zone = data.aws_availability_zones.available.names[count.index]
+
+  tags = {
+    Name = "private-data-subnet-${count.index + 1}"
   }
 }
 
@@ -44,16 +56,18 @@ resource "aws_internet_gateway" "main" {
 
 # Elastic IP for NAT Gateway
 resource "aws_eip" "nat" {
+  count = 2
   domain = "vpc"
 }
 
 # NAT Gateway
 resource "aws_nat_gateway" "main" {
-  allocation_id = aws_eip.nat.id
-  subnet_id     = aws_subnet.public[0].id
+  count         = 2
+  allocation_id = aws_eip.nat[count.index].id
+  subnet_id     = aws_subnet.public[count.index].id
 
   tags = {
-    Name = "nat-gateway"
+    Name = "nat-gateway-${count.index + 1}"
   }
 }
 
@@ -71,17 +85,28 @@ resource "aws_route_table" "public" {
   }
 }
 
-# Private Route Table
-resource "aws_route_table" "private" {
+# Private App Route Tables
+resource "aws_route_table" "private_app" {
+  count  = 2
   vpc_id = aws_vpc.website_vpc.id
 
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.main.id
+    nat_gateway_id = aws_nat_gateway.main[count.index].id
   }
 
   tags = {
-    Name = "private-rt"
+    Name = "private-app-rt-${count.index + 1}"
+  }
+}
+
+# Private Data Route Tables
+resource "aws_route_table" "private_data" {
+  count  = 2
+  vpc_id = aws_vpc.website_vpc.id
+
+  tags = {
+    Name = "private-data-rt-${count.index + 1}"
   }
 }
 
@@ -92,11 +117,18 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
-# Route Table Association for Private Subnet
-resource "aws_route_table_association" "private" {
+# Route Table Association for Private App Subnet
+resource "aws_route_table_association" "private_app" {
   count          = 2
-  subnet_id      = aws_subnet.private[count.index].id
-  route_table_id = aws_route_table.private.id
+  subnet_id      = aws_subnet.private_app[count.index].id
+  route_table_id = aws_route_table.private_app[count.index].id
+}
+
+# Route Table Association for Private Data Subnet
+resource "aws_route_table_association" "private_data" {
+  count          = 2
+  subnet_id      = aws_subnet.private_data[count.index].id
+  route_table_id = aws_route_table.private_data[count.index].id
 }
 
 # Security group for bastion host

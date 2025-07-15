@@ -29,7 +29,7 @@ resource "aws_autoscaling_group" "wordpress" {
   max_size            = 4
   min_size            = 2
   target_group_arns   = [aws_lb_target_group.wordpress.arn]
-  vpc_zone_identifier = aws_subnet.private[*].id
+  vpc_zone_identifier = aws_subnet.private_app[*].id
 
   launch_template {
     id      = aws_launch_template.wordpress.id
