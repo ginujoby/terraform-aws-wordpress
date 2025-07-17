@@ -79,7 +79,7 @@ This project provisions a WordPress environment on AWS using Terraform. It autom
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/yourusername/terraform-aws-wordpress.git
+    git clone https://github.com/ginujoby/terraform-aws-wordpress.git
     cd terraform-aws-wordpress
     ```
 
