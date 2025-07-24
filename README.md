@@ -33,6 +33,9 @@ This project provisions a WordPress environment on AWS using Terraform. It autom
 │                               │                           │                               │
 │                               └───────────────────────────┘                               │
 │                                             ▲                                             │
+│                                             │                                             │
+│            Availability Zone A              │              Availability Zone B            │
+│                                             │                                             │
 │   ┌───────── Public Subnet 1 ─────────┐     │     ┌───────── Public Subnet 2 ─────────┐   │
 │   │                                   │     │     │                                   │   │
 │   │                                   │     │     │                                   │   │
